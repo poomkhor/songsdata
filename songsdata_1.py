@@ -12,12 +12,18 @@ import credential
 from spotipy.oauth2 import SpotifyClientCredentials
 
 df = pd.read_csv('charts.csv')
-artists = list(set(df.artist))
+
+
+# spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
+genius = lg.Genius(os.environ['GENIUS_ACCESS_TOKEN'])
 
 # get songs' lyrics from artist
 def get_lyrics(artist):
-    
-    return None
+    artist = genius.search_artist(artist, sort='popularity')
+    songs = artist.songs
+    lyrics = songs.to_dict()
+    print(lyrics)
+    return lyrics
 
 # search songs name and artist for spotify uri
 def get_spotify_uri(artist, song_title):
@@ -40,16 +46,16 @@ def get_data(artists_list):
 # for song in songs:
 # get the lyrics
 # spotipy search for song + artist to get the features
-spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
-genius = lg.Genius(os.environ['GENIUS_ACCESS_TOKEN'])
 
-name = 'ed sheeran'
-track = 'bad habits'
-result = spotify.search(q= f'artist: + {name}, track: + {track}', type='artist,track')
-print(json.dumps(result, indent=4, sort_keys=False))
-# for artist in artists:
+
+# name = 'ed sheeran'
+# track = 'bad habits'
+# result = spotify.search(q= f'artist: + {name}, track: + {track}', type='artist,track')
+# print(json.dumps(result, indent=4, sort_keys=False))
+
 
 if __name__ == '__main__':
-    artists_list = artists[:5]
-    get_data(artists_list)
-    print(df)
+    artists_list = artists[2500]
+    # print(artists)
+    get_lyrics('drake')
+    # print(df)
