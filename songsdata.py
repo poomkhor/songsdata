@@ -16,19 +16,6 @@ from spotipy.oauth2 import SpotifyClientCredentials
 
 # scope = 'user-read-currently-playing'
 
-uri_list = ['https://play.spotify.com/track/7CFa3xyrZiZNiNeKuxocvZ',
- 'https://play.spotify.com/track/3xLT5J7qbKvDiTCNdaRgW3',
- 'https://play.spotify.com/track/0RIFH0Gx0GrEjrSkjOkmzU',
- 'https://play.spotify.com/track/5uPFOrMHlN0MuGrAExzsaI',
- 'https://play.spotify.com/track/1PBx7cbYiqzDykOBCA3SOc',
- 'https://play.spotify.com/track/2FvLqe3wIQKPLmB4IAbi23',
- 'https://play.spotify.com/track/284y3yJIznK3JTCIBLaWOC',
- 'https://play.spotify.com/track/5pyKz3eWCyPxgPqMcO8blh',
- 'https://play.spotify.com/track/5RDeLr6aNWt1q35y8cmhmn',
- 'https://play.spotify.com/track/6Ady6fcmUjjC2H99X0JW85']
-
-
-
 def get_songs_features(uri_list):
     spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials())
     genius = lg.Genius(os.environ['GENIUS_ACCESS_TOKEN'])
@@ -55,21 +42,33 @@ def get_songs_features(uri_list):
             songDict['duration'] = features[0]['duration_ms']
             songDict['time_signature'] = features[0]['time_signature']
             song = genius.search_song(artist=songDict['artist'], title=songDict['title'])
-            lyrics = song.to_dict()
+            song_info = song.to_dict()
+            # print(json.dumps(song_info, indent=4))
+            if song_info['lyrics_state'] == 'complete':
+                lyrics = song_info['lyrics']
+            else:
+                lyrics = None
+            # print(lyrics)
             songDict['lyrics'] = lyrics
         except:
             pass
-
         dict_list.append(songDict)
     df = pd.DataFrame.from_dict(dict_list)
     return df
     
 if __name__ == '__main__':
-    sample_uri = ['https://open.spotify.com/album/3h3Kj1ipfSRMWlU8TUPevb?highlight=spotify:track:1sKKqbK0zlQSYRzHggEtvO']
-    features_df = get_songs_features(sample_uri)
-    # features_df = get_songs_features(uri_list)
-    features_df.to_csv(f'sample.csv', index= False, header=True)
-    print(features_df)
+    df = pd.read_csv('wasabi_songs.csv', sep='\t', engine='python')
+    prep_df = df[df.urlSpotify.notna()]
+    uri_list_data = prep_df.urlSpotify.tolist()
+    start, end, step = 0, 100000, 500
+    for i in range(start, end, step):
+        uri_list = uri_list_data[i: i+step]
+    # sample_uri = ['https://play.spotify.com/track/2FvLqe3wIQKPLmB4IAbi23']
+    # features_df = get_songs_features(sample_uri)
+        features_df = get_songs_features(uri_list)
+        features_df.to_csv(f'songsdata_{i}.csv', index= False, header=True)
+        time.sleep(15)
+    # print(features_df.lyrics)
 
 # columns = ['artist','title','danceability','energy','key',
 #             'loudness','mode','speechiness','acousticness',
