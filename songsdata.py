@@ -52,21 +52,22 @@ def get_songs_features(uri_list):
             songDict['lyrics'] = lyrics
         except:
             pass
-
         dict_list.append(songDict)
+        time.sleep(3)
     df = pd.DataFrame.from_dict(dict_list)
     return df
     
 if __name__ == '__main__':
     df = pd.read_csv('wasabi_songs.csv', sep='\t', engine='python')
     uri_list_data = df.urlSpotify.tolist()
-    start, end, step = 0, 100000, 10000
+    start, end, step = 0, 100000, 5000
     for i in range(start, end, step):
         uri_list = uri_list_data[i: i+step]
     # sample_uri = ['https://play.spotify.com/track/2FvLqe3wIQKPLmB4IAbi23']
     # features_df = get_songs_features(sample_uri)
         features_df = get_songs_features(uri_list)
         features_df.to_csv(f'songsdata_{i}.csv', index= False, header=True)
+        time.sleep(30)
     # print(features_df.lyrics)
 
 # columns = ['artist','title','danceability','energy','key',
